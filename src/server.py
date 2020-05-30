@@ -4,7 +4,8 @@ import threading
 import websockets
 import pika
 
-from src.RabbitMQConsumerThread import RabbitMQConsumerThread
+from RabbitMQConsumerThread import RabbitMQConsumerThread
+# from src.RabbitMQConsumerThread import RabbitMQConsumerThread
 
 amqp_url = 'amqp://hiiscdyn:r82F2WHFvJ8cGyb6ZVabMbzvprfKk92O@rattlesnake.rmq.cloudamqp.com/hiiscdyn'
 
@@ -41,8 +42,10 @@ async def handle_client(websocket, path):
     print("[WebSocketServer] Stopped all subscription threads. Client disconnect successful!")
 
 
-start_server = websockets.serve(handle_client, "0.0.0.0", 8765)
-
+server_host = "0.0.0.0"
+server_port = 8765
+start_server = websockets.serve(handle_client, server_host, server_port)
+print("[WebSocketServer] Started server on host: ", server_host, " port: ", server_port)
 
 
 asyncio.get_event_loop().run_until_complete(start_server)
