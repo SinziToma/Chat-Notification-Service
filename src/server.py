@@ -44,8 +44,8 @@ async def handle_client(websocket, path):
 
 server_host = "0.0.0.0"
 server_port = 8765
-start_server = websockets.serve(handle_client, server_host, server_port)
-print("[WebSocketServer] Started server on host: ", server_host, " port: ", server_port)
+start_server = websockets.serve(handle_client, port=server_port)
+print("[WebSocketServer] Started server on port: ", server_port)
 
 
 asyncio.get_event_loop().run_until_complete(start_server)
