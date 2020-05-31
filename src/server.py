@@ -3,6 +3,7 @@ import threading
 
 import websockets
 import pika
+import re
 
 from RabbitMQConsumerThread import RabbitMQConsumerThread
 # from src.RabbitMQConsumerThread import RabbitMQConsumerThread
@@ -12,16 +13,18 @@ amqp_url = 'amqp://hiiscdyn:r82F2WHFvJ8cGyb6ZVabMbzvprfKk92O@rattlesnake.rmq.clo
 
 async def handle_client(websocket, path):
     # await matched id list from client
-    print("[WebSocketServer] Client connected!")
+    print("[WebSocketServer] Client connected! IP: ", websocket.remote_address)
     id_list = await websocket.recv()
-    threads = []
+    id_list = re.sub("[^0-9\ ]", '', id_list)
+    print("[WebSocketServer] Received id list: ", id_list)
     id_list = id_list.split(' ')
     # await websocket.send("message from handler")
 
+    threads = []
     # subscribe to the queues for all the ids in the list
-    for matched_contact_id in id_list:
-        t = RabbitMQConsumerThread(websocket, matched_contact_id)
-        # t = threading.Thread(target=rabbitmq_channel_subscription, args=(matched_contact_id, connections))
+    for profile_id in id_list:
+        t = RabbitMQConsumerThread(websocket, profile_id)
+        # t = threading.Thread(target=rabbitmq_channel_subscription, args=(profile_id, connections))
         threads.append(t)
         t.start()
 
@@ -35,8 +38,8 @@ async def handle_client(websocket, path):
     connection_rabbitmq = pika.BlockingConnection(params)
     channel = connection_rabbitmq.channel()
 
-    for matched_contact_id in id_list:
-        channel.basic_publish(exchange='', routing_key=f"matched_contact_id_{matched_contact_id}",
+    for profile_id in id_list:
+        channel.basic_publish(exchange='', routing_key=f"matched_contact_id_{profile_id}",
                               body='end all connections msg')
     connection_rabbitmq.close()
     print("[WebSocketServer] Stopped all subscription threads. Client disconnect successful!")
