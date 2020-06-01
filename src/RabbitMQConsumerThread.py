@@ -26,7 +26,7 @@ class RabbitMQConsumerThread(threading.Thread):
         asyncio.set_event_loop(loop)
 
         # delegate rabbitmq message back to websocket
-        for message in channel.consume(f"profile_id_{self.profile_id}", auto_ack=True):
+        for message in channel.consume(f"profile_id_{self.profile_id}", auto_ack=True, inactivity_timeout=3600):
             if self._is_interrupted:
                 break
             if not message:
@@ -37,6 +37,6 @@ class RabbitMQConsumerThread(threading.Thread):
         connection_rabbitmq.close()
 
     async def send_message_on_ws(self, message):
-        print(f"[RabbitMQConsumerThread] Sending message on websocket: {message}")
         message_string = message.decode("utf-8")
+        print(f"[RabbitMQConsumerThread] Sending message on websocket: {message_string}")
         await self.websocket.send(message_string)
